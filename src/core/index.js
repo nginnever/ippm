@@ -1,6 +1,7 @@
 'use strict'
 
 const test = require('./IPPM/test')
+const init = require('./IPPM/init')
 
 exports = module.exports = IPPM
 
@@ -10,4 +11,5 @@ function IPPM () {
 	}
 
 	this.test = test(this)
+	this.init = init(this)
 }

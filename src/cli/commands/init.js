@@ -7,16 +7,15 @@ module.exports = Command.extend({
 	desc: 'testing cli',
 
 	options: {
-		format: {
+		force: {
 			alias: 'f',
-			type: 'string'
+			type: 'boolean'
 		}
 	},
 
-	run: (name) => {
-		console.log(name)
+	run: (force) => {
 		utils.getIPPM((err, ippm) => {
-			ippm.test()
+			ippm.init()
 		})
 	}
 })
