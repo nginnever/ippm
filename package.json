@@ -1,0 +1,25 @@
+{
+  "name": "interplanetary-package-manager",
+  "version": "0.0.1",
+  "description": "a distributed npm",
+  "main": "src/core/index.js",
+  "bin": {
+    "ippm": "src/cli/bin.js"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nginnever/ippm.git"
+  },
+  "author": "Nathan Ginnever",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/nginnever/ippm/issues"
+  },
+  "homepage": "https://github.com/nginnever/ippm#readme",
+  "dependencies": {
+    "ronin": "^0.3.11"
+  }
+}
