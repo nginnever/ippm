@@ -1,6 +1,7 @@
 'use strict'
 
 const Command = require('ronin').Command
+const utils = require('../utils')
 
 module.exports = Command.extend({
 	desc: 'testing cli',
@@ -13,6 +14,8 @@ module.exports = Command.extend({
 	},
 
 	run: (name) => {
-		console.log('weeee command ran')
+		utils.getIPPM((err, ippm) => {
+			ippm.test()
+		})
 	}
 })
