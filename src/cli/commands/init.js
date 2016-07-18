@@ -4,7 +4,7 @@ const Command = require('ronin').Command
 const utils = require('../utils')
 
 module.exports = Command.extend({
-	desc: 'testing cli',
+	desc: 'initialize package.json',
 
 	options: {
 		force: {
