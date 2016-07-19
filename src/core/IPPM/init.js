@@ -39,9 +39,6 @@ module.exports = function init (self) {
     	},
     	{
     		name: 'license'
-    	},
-    	{
-    		name: 'description'
     	}
     ]
 
