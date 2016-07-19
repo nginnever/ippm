@@ -62,19 +62,17 @@ module.exports = function init (self) {
     	pkg["author"] = res.author
     	pkg["license"] = res.license
 
-    	console.log(JSON.stringify(pkg))
     	jsonfile.writeFile(file, pkg, {spaces: 2}, (err) => {
     		if (err) {
     			console.log(err)
     		}
     		console.log('Wrote package.json at: ', process.cwd())
-    	})
-      console.log('Test: ' + res.testing)
+        })
     })
 
-	  function onErr(err) {
-	    console.log(err)
-	    return 1
-	  }
+  	function onErr(err) {
+  	  console.log(err)
+  	  return 1
+  	}
   }
 }
