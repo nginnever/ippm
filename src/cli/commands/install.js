@@ -8,7 +8,11 @@ module.exports = Command.extend({
 
   run: (name) => {
     utils.getIPPM((err, ippm) => {
-      ippm.install(name)
+      ippm.install(name, (err, res) => {
+        if (err) {
+          console.log(err)
+        }
+      })
     })
   }
 })
