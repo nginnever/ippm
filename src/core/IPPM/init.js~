@@ -62,8 +62,8 @@ module.exports = function init (self) {
       jsonfile.writeFile(file, pkg, {spaces: 2}, (err) => {
         if (err) {
           console.log(err)
-    	  }
-    	  console.log('Wrote package.json at: ', process.cwd())
+    	}
+    	console.log('Wrote package.json at: ', process.cwd())
       })
     })
 
