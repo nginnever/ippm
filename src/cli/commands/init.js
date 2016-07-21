@@ -13,7 +13,7 @@ module.exports = Command.extend({
     }
   },
 
-  run: (force) => {
+  run: (options) => {
     utils.getIPPM((err, ippm) => {
       ippm.init()
     })

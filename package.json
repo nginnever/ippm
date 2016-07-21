@@ -20,6 +20,7 @@
   },
   "homepage": "https://github.com/nginnever/ippm#readme",
   "dependencies": {
+    "ipfs": "^0.14.1",
     "jsonfile": "^2.3.1",
     "prompt": "^1.0.0",
     "ronin": "^0.3.11",

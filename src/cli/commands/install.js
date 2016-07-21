@@ -6,11 +6,20 @@ const utils = require('../utils')
 module.exports = Command.extend({
   desc: 'install a package',
 
-  run: (name) => {
+  options: {
+    repo: {
+      alias: 'p',
+      type: 'string'
+    }
+  },
+
+  run: (options, name) => {
     utils.getIPPM((err, ippm) => {
+      console.log('NAME: ' +name)
+      console.log('REPO PATH: ' + options)
       ippm.install(name, (err, res) => {
         if (err) {
-          console.log(err)
+          throw err
         }
       })
     })
