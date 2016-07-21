@@ -3,9 +3,6 @@
 const test = require('./IPPM/test')
 const init = require('./IPPM/init')
 const install = require('./IPPM/install')
-const Web3 = require('web3')
-
-let web3
 
 exports = module.exports = IPPM
 

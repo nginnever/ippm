@@ -116,7 +116,7 @@ function search (name) {
   })
 }
 
-module.exports = function test (self) {
+module.exports = function install (self) {
   return(name, callback) => {
     if (typeof opts === 'function') {
       callback = opts
@@ -141,16 +141,17 @@ module.exports = function test (self) {
 	    } else {
 	      // set the provider you want from Web3.providers
 	      // local server
-	      //web3 = new Web3(new Web3.providers.HttpProvider("http://192.168.0.28:8545"))
+	      //web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
 
 	      // demo server
 	      web3 = new Web3(new Web3.providers.HttpProvider("http://149.56.133.176:8545"))
 	    }
 
 	    search(name).then((res) => {
-	    	console.log(res)
+	    	console.log('ipfs: ' + res[2] + res[3])
+
 	    })
-	    console.log('Installed: ' + name)
+	    console.log('Installing: ' + name)
     }
   }
 }
