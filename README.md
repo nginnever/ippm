@@ -4,7 +4,7 @@ An NPM compatible distributed package manager for Javascript dependencies.
 
 ## Data Model
 
-Each node in the blockchain list will store a registry for the IPPM packages in [IPLD](https://github.com/ipfs/specs/tree/master/ipld) format. Here a link is an IPLD link to the content of the module.
+Each node in the blockchain list will store a registry for the IPPM packages in [IPLD](https://github.com/ipfs/specs/tree/master/ipld) format. Here a ```"link"``` is an IPLD link to the content of the module.
 
 Example: ipfs-unixfs-engine module
 
