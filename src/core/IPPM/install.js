@@ -5,6 +5,7 @@ const path = require('path')
 const Web3 = require('web3')
 const IPFS = require('ipfs')
 const abi = require('../utils').abi
+const bs58 = require('bs58')
 
 let web3
 let ipfs
@@ -22,12 +23,32 @@ function search (name) {
   })
 }
 
+function createDeps (linkHash) {
+	return new Promise((resolve, reject) => {
+		resolve()
+	})
+}
+
 function readPkgFile (pkgHash) {
   return new Promise((resolve, reject) => {
-    ipfs.goOffline((err, res) => {
-      if (err) { reject(err) }
-      resolve()
-    })
+  	var f = false
+  	const mh = new Buffer(bs58.decode(pkgHash))
+  	ipfs.object.get(mh, (err, res) => {
+  		if (err) { reject(err) }
+  		res.links.forEach((link) => {
+  			if (link.name === 'package.json') {
+  				f = true
+  				resolve(link.hash)
+  			}
+  		})
+  	  // not sure this is a good idea
+  	  if (!f) {
+	  	  ipfs.goOffline((err, res) => {
+				  if (err) { reject(err) }
+				})
+				// reject()
+  	  }
+  	})
   })
 }
 
@@ -68,7 +89,7 @@ function getPkg (hash) {
           file.content.on('data', (buf) => {
             // always grab the latest registered version
             const size = JSON.parse(buf.toString()).versions.length
-            console.log(JSON.parse(buf.toString()).versions)
+            // console.log(JSON.parse(buf.toString()).versions)
             resolve(JSON.parse(buf.toString()).versions[size - 1].hash)
           })
         })
@@ -113,9 +134,17 @@ module.exports = function install (self) {
           return
         }
         console.log('ipfs: ' + res[2] + res[3])
-        getPkg(res[2] + res[3]).then((pkgHash) => new Promise((resolve, reject) => {
-          readPkgFile(pkgHash)
-        }))
+        getPkg(res[2] + res[3]).then((pkgHash) => {
+          readPkgFile(pkgHash).then((linkHash) => {
+          	console.log(linkHash)
+          	createDeps(linkHash).then((someReturn) => {
+				      ipfs.goOffline((err, res) => {
+							  if (err) { throw (err) }
+							  //resolve()
+							})
+          	})
+          })
+        })
       })
       console.log('Installing: ' + name)
     }
