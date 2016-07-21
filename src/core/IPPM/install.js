@@ -4,9 +4,12 @@ const jsonfile = require('jsonfile')
 const path = require('path')
 const Web3 = require('web3')
 const IPFS = require('ipfs')
-const abi = require('../abi').abi
+const abi = require('../utils').abi
+const base58 = require('bs58')
+const JSONB = require('json-buffer')
 
 let web3
+let ipfs
 
 function search (name) {
   return new Promise((resolve, reject) => {
@@ -20,11 +23,62 @@ function search (name) {
   })
 }
 
-function getPkgInfo (hash) {
+function getPkg (hash) {
 	return new Promise((resolve, reject) => {
-		const ipfs = new IPFS()
-		console.log(hash)
+		ipfs = new IPFS()
+		ipfs.init({}, (err) => {
+      if (err) {
+        if (err.message === 'repo already exists') {
+          return resolve()
+        }
+        return reject(err)
+      }
+      resolve()
+		})
 	})
+		.then(() => new Promise((resolve, reject) => {
+			console.log('repo ready!')
+			ipfs.goOnline(() => resolve(ipfs))
+		}))
+		.then((id) => new Promise((resolve, reject) => {
+			console.log('ipfs online')
+			ipfs.config.show((err, config) => {
+				if (err) return reject(err)
+				resolve(config)
+			})
+/*			hash = 'QmPevovfSULxEK71jYdS6rwDKRGXAWnc1ppXaACtfZHY37'
+			const mh = new Buffer(base58.decode(hash))
+			console.log(hash)
+			ipfs.object.get(mh, (err, res) => {
+				if (err) {
+					console.log(err)
+				}
+				//const json = res.data.toJSON()
+				//const copy = JSON.parse(json)
+				const str = res.data.toString()
+				const json = JSON.stringify(str)
+
+				console.log(json);
+				
+			})
+			ipfs.files.get(hash, (err, res) => {
+				res.on('data', (file) => {
+					file.content.on('data', (buf) => {
+						console.log(JSON.parse(buf.toString()).foo)
+					})
+				})
+			})*/
+			//resolve()
+		}))
+	  .then(() => new Promise((resolve, reject) => {
+	  	ipfs.id((err, id) => {
+	  		if (err) return reject(err)
+	  		resolve(id)
+	  	})
+	  }))
+	  .then((id) => new Promise((resolve, reject) => {
+	  	console.log(id)
+	  }))
 }
 
 module.exports = function install (self) {
@@ -60,7 +114,7 @@ module.exports = function install (self) {
 
 	    search(name).then((res) => {
 	    	console.log('ipfs: ' + res[2] + res[3])
-	    	getPkgInfo(res[2] + res[3])
+	    	getPkg(res[2] + res[3])
 	    })
 	    console.log('Installing: ' + name)
     }

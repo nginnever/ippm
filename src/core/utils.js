@@ -1,5 +1,5 @@
-module.exports = {
-  abi: 
+
+exports.abi =
 	  [{
 	    "constant": true,
 	    "inputs": [],
@@ -97,4 +97,3 @@ module.exports = {
 	    }],
 	    "type": "function"
 	  }]
-}
