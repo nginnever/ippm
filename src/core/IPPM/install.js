@@ -46,29 +46,6 @@ function getPkg (hash) {
 				if (err) return reject(err)
 				resolve(config)
 			})
-/*			hash = 'QmPevovfSULxEK71jYdS6rwDKRGXAWnc1ppXaACtfZHY37'
-			const mh = new Buffer(base58.decode(hash))
-			console.log(hash)
-			ipfs.object.get(mh, (err, res) => {
-				if (err) {
-					console.log(err)
-				}
-				//const json = res.data.toJSON()
-				//const copy = JSON.parse(json)
-				const str = res.data.toString()
-				const json = JSON.stringify(str)
-
-				console.log(json);
-				
-			})
-			ipfs.files.get(hash, (err, res) => {
-				res.on('data', (file) => {
-					file.content.on('data', (buf) => {
-						console.log(JSON.parse(buf.toString()).foo)
-					})
-				})
-			})*/
-			//resolve()
 		}))
 	  .then(() => new Promise((resolve, reject) => {
 	  	ipfs.id((err, id) => {
@@ -77,8 +54,23 @@ function getPkg (hash) {
 	  	})
 	  }))
 	  .then((id) => new Promise((resolve, reject) => {
-	  	console.log(id)
+	  	hash = 'QmPevovfSULxEK71jYdS6rwDKRGXAWnc1ppXaACtfZHY37'
+	  	ipfs.files.get(hash, (err, res) => {
+	  		if (err) { return reject(err) }
+				res.on('data', (file) => {
+					file.content.on('data', (buf) => {
+						console.log(JSON.parse(buf.toString()).foo)
+						resolve()
+					})
+				})
+			})
+	  	//console.log(id)
 	  }))
+	  .then(() => new Promise((resolve, reject) => {
+      ipfs.goOffline((err, res) => {
+      	resolve()
+      })
+    }))
 }
 
 module.exports = function install (self) {
