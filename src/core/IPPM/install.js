@@ -23,6 +23,8 @@ function search (name) {
   })
 }
 
+
+
 function getPkg (hash) {
 	return new Promise((resolve, reject) => {
 		ipfs = new IPFS()
@@ -54,18 +56,23 @@ function getPkg (hash) {
 	  	})
 	  }))
 	  .then((id) => new Promise((resolve, reject) => {
-	  	hash = 'QmPevovfSULxEK71jYdS6rwDKRGXAWnc1ppXaACtfZHY37'
 	  	ipfs.files.get(hash, (err, res) => {
 	  		if (err) { return reject(err) }
 				res.on('data', (file) => {
 					file.content.on('data', (buf) => {
-						console.log(JSON.parse(buf.toString()).foo)
-						resolve()
+						// always grab the latest registered version
+						const size = JSON.parse(buf.toString()).versions.length
+						console.log(JSON.parse(buf.toString()).versions)
+						resolve(JSON.parse(buf.toString()).versions[size - 1].hash)
 					})
 				})
 			})
 	  	//console.log(id)
 	  }))
+	  .then((repoHash) => new Promise((resolve, reject) => {
+	  	console.log(repoHash)
+	  	resolve()
+    }))
 	  .then(() => new Promise((resolve, reject) => {
       ipfs.goOffline((err, res) => {
       	resolve()
@@ -105,6 +112,10 @@ module.exports = function install (self) {
 	    }
 
 	    search(name).then((res) => {
+	    	if (res[2] === '') {
+	    		console.log('No package found')
+	    		return 
+	    	}
 	    	console.log('ipfs: ' + res[2] + res[3])
 	    	getPkg(res[2] + res[3])
 	    })
