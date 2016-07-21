@@ -1,7 +1,7 @@
 'use strict'
 
 module.exports = function test (self) {
-  return(opts, callback) => {
+  return (opts, callback) => {
     if (typeof opts === 'function') {
       callback = opts
       opts = {}

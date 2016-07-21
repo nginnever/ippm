@@ -15,7 +15,8 @@ module.exports = Command.extend({
 
   run: (options, name) => {
     utils.getIPPM((err, ippm) => {
-      console.log('NAME: ' +name)
+      if (err) { throw err }
+      console.log('NAME: ' + name)
       console.log('REPO PATH: ' + options)
       ippm.install(name, (err, res) => {
         if (err) {

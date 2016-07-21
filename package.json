@@ -2,12 +2,14 @@
   "name": "interplanetary-package-manager",
   "version": "0.0.1",
   "description": "a distributed npm",
-  "main": "src/core/index.js",
+  "main": "lib/core/index.js",
+  "jsnext:main": "src/core/index.js",
   "bin": {
     "ippm": "src/cli/bin.js"
   },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "lint": "aegir-lint"
   },
   "repository": {
     "type": "git",
@@ -27,5 +29,9 @@
     "prompt": "^1.0.0",
     "ronin": "^0.3.11",
     "web3": "^0.17.0-alpha"
+  },
+  "devDependencies": {
+    "aegir": "^4.0.0",
+    "standard": "^7.1.2"
   }
 }
