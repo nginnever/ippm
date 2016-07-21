@@ -1,3 +1,5 @@
+# Interplanetary Package Manager
+
 An NPM compatible distributed package manager for Javascript dependencies.
 
 ## Data Model
