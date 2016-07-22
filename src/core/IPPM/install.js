@@ -25,7 +25,19 @@ function search (name) {
 
 function createDeps (linkHash) {
 	return new Promise((resolve, reject) => {
-		resolve()
+    ipfs.files.get(linkHash, (err, res) => {
+      if (err) { return reject(err) }
+      res.on('data', (file) => {
+        file.content.on('data', (buf) => {
+          const deps = JSON.parse(buf.toString()).dependencies
+          const devDeps = JSON.parse(buf.toString()).devDependencies
+          console.log(devDeps)
+          // console.log(JSON.parse(buf.toString()).versions)
+          //resolve(JSON.parse(buf.toString()).versions[size - 1].hash)
+        })
+      })
+    })
+		//resolve()
 	})
 }
 
@@ -133,10 +145,10 @@ module.exports = function install (self) {
           console.log('No package found')
           return
         }
-        console.log('ipfs: ' + res[2] + res[3])
+        console.log('element: ' + res[2] + res[3])
         getPkg(res[2] + res[3]).then((pkgHash) => {
           readPkgFile(pkgHash).then((linkHash) => {
-          	console.log(linkHash)
+          	console.log('repository: ' + bs58.encode(linkHash))
           	createDeps(linkHash).then((someReturn) => {
 				      ipfs.goOffline((err, res) => {
 							  if (err) { throw (err) }
