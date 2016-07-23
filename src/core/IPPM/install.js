@@ -9,8 +9,9 @@ const bs58 = require('bs58')
 
 let web3
 let ipfs
+var index = {}
 
-function search (name) {
+function searchReg (name) {
   return new Promise((resolve, reject) => {
     const registryContract = web3.eth.contract(abi)
     // const regInstance = registryContract.at('0xb5f546d5bc8ab6ce0a4091c8bf906800627912cd')
@@ -23,7 +24,40 @@ function search (name) {
   })
 }
 
-function createDeps (linkHash) {
+function writeDep (pkgName) {
+	return new Promise((resolve, reject) => {
+		searchReg(pkgName).then((ihash) => {
+			// if (ihash[2] === '') { return reject(new Error ('package not found in registry')) }
+			/*getLatestVersion(ihash[2]+ihash[3]).then((dephash) => {
+				console.log()
+			})*/
+			getLatestVersion('QmbzSwZYjFTLNu2qN8rw4Htkte6wFdjFNTSLJeuWf4rGbV').then((dephash) => {
+				console.log(dephash)
+				console.log('hash: ' + ihash[2]+ihash[3])
+				console.log('writing: ' + pkgName + ' - version: ' + index[pkgName])
+
+				resolve(pkgName)
+			})
+		})
+	})
+}
+
+function getDep (hash) {
+  return new Promise((resolve, reject) => {
+    ipfs.files.get(hash, (err, res) => {
+      if (err) { return reject(err) }
+      res.on('data', (file) => {
+        file.content.on('data', (buf) => {
+          // always grab the latest registered version
+          const size = JSON.parse(buf.toString()).versions.length
+          resolve(JSON.parse(buf.toString()).versions[size - 1].hash)
+        })
+      })
+    })
+  })
+}
+
+function readDeps (linkHash) {
 	return new Promise((resolve, reject) => {
     ipfs.files.get(linkHash, (err, res) => {
       if (err) { return reject(err) }
@@ -31,13 +65,21 @@ function createDeps (linkHash) {
         file.content.on('data', (buf) => {
           const deps = JSON.parse(buf.toString()).dependencies
           const devDeps = JSON.parse(buf.toString()).devDependencies
-          console.log(devDeps)
-          // console.log(JSON.parse(buf.toString()).versions)
-          //resolve(JSON.parse(buf.toString()).versions[size - 1].hash)
+					var combine = {}
+					for(var key in deps) combine[key]=deps[key]
+					for(var key in devDeps) combine[key]=devDeps[key]
+					index = combine
+          for (var key in combine) {
+          	// version
+						// console.log(deps[key])
+						writeDep(key).then((k) => {
+							console.log('wrote: ' + k)
+						})
+					}
         })
       })
     })
-		//resolve()
+		resolve()
 	})
 }
 
@@ -64,8 +106,8 @@ function readPkgFile (pkgHash) {
   })
 }
 
-function getPkg (hash) {
-  return new Promise((resolve, reject) => {
+function ipfsOn () {
+	return new Promise((resolve, reject) => {
     ipfs = new IPFS()
     ipfs.init({}, (err) => {
       if (err) {
@@ -76,38 +118,33 @@ function getPkg (hash) {
       }
       resolve()
     })
-  })
-    .then(() => new Promise((resolve, reject) => {
+	})
+	  .then(() => new Promise((resolve, reject) => {
       console.log('repo ready!')
       ipfs.goOnline(() => resolve(ipfs))
-    }))
-    .then((id) => new Promise((resolve, reject) => {
-      console.log('ipfs online')
-      ipfs.config.show((err, config) => {
-        if (err) return reject(err)
-        resolve(config)
-      })
-    }))
-    .then(() => new Promise((resolve, reject) => {
-      ipfs.id((err, id) => {
-        if (err) return reject(err)
-        resolve(id)
-      })
-    }))
-    .then((id) => new Promise((resolve, reject) => {
-      ipfs.files.get(hash, (err, res) => {
-        if (err) { return reject(err) }
-        res.on('data', (file) => {
-          file.content.on('data', (buf) => {
-            // always grab the latest registered version
-            const size = JSON.parse(buf.toString()).versions.length
-            // console.log(JSON.parse(buf.toString()).versions)
-            resolve(JSON.parse(buf.toString()).versions[size - 1].hash)
-          })
+	  }))
+}
+
+function ipfsOff () {
+  ipfs.goOffline((err, res) => {
+	  if (err) { throw (err) }
+	  //resolve()
+	})
+}
+
+function getLatestVersion (hash) {
+  return new Promise((resolve, reject) => {
+    ipfs.files.get(hash, (err, res) => {
+      if (err) { return reject(err) }
+      res.on('data', (file) => {
+        file.content.on('data', (buf) => {
+          // always grab the latest registered version
+          const size = JSON.parse(buf.toString()).versions.length
+          resolve(JSON.parse(buf.toString()).versions[size - 1].hash)
         })
       })
-      // console.log(id)
-    }))
+    })
+  })
 }
 
 module.exports = function install (self) {
@@ -140,22 +177,22 @@ module.exports = function install (self) {
         web3 = new Web3(new Web3.providers.HttpProvider('http://149.56.133.176:8545'))
       }
 
-      search(name).then((res) => {
+      searchReg(name).then((res) => {
         if (res[2] === '') {
           console.log('No package found')
           return
         }
         console.log('element: ' + res[2] + res[3])
-        getPkg(res[2] + res[3]).then((pkgHash) => {
-          readPkgFile(pkgHash).then((linkHash) => {
-          	console.log('repository: ' + bs58.encode(linkHash))
-          	createDeps(linkHash).then((someReturn) => {
-				      ipfs.goOffline((err, res) => {
-							  if (err) { throw (err) }
-							  //resolve()
-							})
-          	})
-          })
+        ipfsOn().then(() => {
+        	console.log('ipfs online')
+	        getLatestVersion(res[2] + res[3]).then((pkgHash) => {
+	          readPkgFile(pkgHash).then((linkHash) => {
+	          	console.log('repository: ' + bs58.encode(linkHash))
+	          	readDeps(linkHash).then((someReturn) => {
+	          		ipfsOff()
+	          	})
+	          })
+	        })
         })
       })
       console.log('Installing: ' + name)
