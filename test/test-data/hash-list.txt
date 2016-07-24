@@ -1,0 +1,6 @@
+registry node hashes
+
+abbrev QmYoTaao4Vyz4LNat228sLero3xQk6t4Wmmuf7GTRoudiJ
+accepts QmPuPq5wAfMRA8wriLCnPJRW1gbajSrF3D74qSZDiNkx62
+acorn QmbhFrLQggtVLfQ8bXre7DcQq812cKSPZoMXsu727r1CXf
+acorn-jsx QmTJxS2CY8YAYdZm6sLictzZmJfh2uP21fKVxo1nAYK28K

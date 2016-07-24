@@ -1,0 +1,9 @@
+{
+  "name": "ipfs-unixfs-engine",
+  "versions": [
+    {
+      "version": "^0.10.0",
+      "hash": "Qmd2Zgzua4atXuqZRTMsMGekDxSftkgNwZxofT9tA6PW47"
+    }
+  ]
+}

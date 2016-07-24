@@ -32,25 +32,28 @@ function writeDep (pkgName) {
         console.log()
       }) */
       getLatestVersion('QmbzSwZYjFTLNu2qN8rw4Htkte6wFdjFNTSLJeuWf4rGbV').then((dephash) => {
-        console.log(dephash)
         console.log('hash: ' + ihash[2] + ihash[3])
         console.log('writing: ' + pkgName + ' - version: ' + index[pkgName])
-
-        resolve(pkgName)
+        getWriteDep('Qmd2Zgzua4atXuqZRTMsMGekDxSftkgNwZxofT9tA6PW47').then(() => {
+          resolve(pkgName)
+        })
       })
     })
   })
 }
 
-function getDep (hash) {
+function getWriteDep (dephash) {
   return new Promise((resolve, reject) => {
-    ipfs.files.get(hash, (err, res) => {
+    ipfs.files.get(dephash, (err, res) => {
       if (err) { return reject(err) }
       res.on('data', (file) => {
+      	if (file.content === null) {return reject()}
         file.content.on('data', (buf) => {
-          // always grab the latest registered version
-          const size = JSON.parse(buf.toString()).versions.length
-          resolve(JSON.parse(buf.toString()).versions[size - 1].hash)
+          console.log(buf)
+        })
+        file.content.on('end', () => {
+      	  console.log('stream ended')
+          resolve()
         })
       })
     })
