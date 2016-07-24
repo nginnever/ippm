@@ -6,10 +6,13 @@ const Web3 = require('web3')
 const IPFS = require('ipfs')
 const abi = require('../utils').abi
 const bs58 = require('bs58')
+const pathExists = require('path-exists')
+const fs = require('fs')
 
 let web3
 let ipfs
 var index = {}
+const installPath = process.cwd() + '/node_modules'
 
 function searchReg (name) {
   return new Promise((resolve, reject) => {
@@ -24,17 +27,32 @@ function searchReg (name) {
   })
 }
 
+function ensureDir (dir, cb) {
+  pathExists(dir)
+    .then((exists) => {
+      if (!exists) {
+        fs.mkdir(dir, cb)
+      } else {
+        cb()
+      }
+    })
+    .catch(cb)
+}
+
 function writeDep (pkgName) {
   return new Promise((resolve, reject) => {
     searchReg(pkgName).then((ihash) => {
-      // if (ihash[2] === '') { return reject(new Error ('package not found in registry')) }
-      /* getLatestVersion(ihash[2]+ihash[3]).then((dephash) => {
-        console.log()
-      }) */
-      getLatestVersion('QmbzSwZYjFTLNu2qN8rw4Htkte6wFdjFNTSLJeuWf4rGbV').then((dephash) => {
-        console.log('hash: ' + ihash[2] + ihash[3])
+      if (ihash[2] === '') {
+        console.log('dependency not registered skipping: ' + pkgName)
+        return reject(new Error ('package not found in registry'))
+      }
+      getLatestVersion(ihash[2]+ihash[3]).then((dephash) => {
+        console.log('---')
         console.log('writing: ' + pkgName + ' - version: ' + index[pkgName])
-        getWriteDep('Qmd2Zgzua4atXuqZRTMsMGekDxSftkgNwZxofT9tA6PW47').then(() => {
+        console.log('nodehash: ' + ihash[2] + ihash[3])
+        console.log('dephash: ' + dephash)
+        console.log('---')
+        getFiles(dephash, pkgName).then(() => {
           resolve(pkgName)
         })
       })
@@ -42,25 +60,50 @@ function writeDep (pkgName) {
   })
 }
 
-function getWriteDep (dephash) {
+function getFiles (dephash, pkgName) {
   return new Promise((resolve, reject) => {
     ipfs.files.get(dephash, (err, res) => {
       if (err) { return reject(err) }
-      res.on('data', (file) => {
-      	if (file.content === null) {return reject()}
-        file.content.on('data', (buf) => {
-          console.log(buf)
-        })
-        file.content.on('end', () => {
-      	  console.log('stream ended')
-          resolve()
-        })
-      })
+      res.on('data', fileHandler(res, pkgName))
+      res.on('end', resolve())
     })
   })
 }
 
-function readDeps (linkHash) {
+function fileHandler (result, pkgName) {
+  return function onFile (file) {
+    console.log(file.path)
+    if (file.path.lastIndexOf('/') === -1) {
+      ensureDir(path.join(installPath, pkgName))
+    }
+    // Check to see if the result is in a directory
+/*    if (file.path.lastIndexOf('/') === -1) {
+      const dirPath = path.join(dir, file.path)
+      // Check to see if the result is a directory
+      if (file.dir === false) {
+        file.content.pipe(fs.createWriteStream(dirPath))
+      } else {
+        ensureDir(dirPath, (err) => {
+          if (err) {
+            throw err
+          }
+        })
+      }
+    } else {
+      const filePath = file.path.substring(0, file.path.lastIndexOf('/') + 1)
+      const dirPath = path.join(dir, filePath)
+      ensureDir(dirPath, (err) => {
+        if (err) {
+          throw err
+        }
+
+        file.content.pipe(fs.createWriteStream(dirPath))
+      })
+    }*/
+  }
+}
+
+function createDeps (linkHash) {
   return new Promise((resolve, reject) => {
     ipfs.files.get(linkHash, (err, res) => {
       if (err) { return reject(err) }
@@ -166,6 +209,9 @@ module.exports = function install (self) {
           }
           return callback(err, null)
         }
+        // place logic here for ippm install <no arg>
+        // this should look in package.json and begin
+        // installing dependencies
         console.log(obj)
       })
     } else {
@@ -190,9 +236,14 @@ module.exports = function install (self) {
           console.log('ipfs online')
           getLatestVersion(res[2] + res[3]).then((pkgHash) => {
             readPkgFile(pkgHash).then((linkHash) => {
-              console.log('repository: ' + bs58.encode(linkHash))
-              readDeps(linkHash).then((someReturn) => {
-                ipfsOff()
+              console.log('writing package: ')
+              ensureDir(installPath, () => {
+                console.log('wrote node_modules folder: ')
+                getFiles(pkgHash, name).then(() => {
+                  createDeps(linkHash).then(() => {
+                    ipfsOff()
+                  })
+                })
               })
             })
           })
