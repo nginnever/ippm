@@ -72,20 +72,15 @@ function getFiles (dephash, pkgName) {
 
 function fileHandler (result, pkgName) {
   return function onFile (file) {
-    //console.log(file.path)
     if (file.path.lastIndexOf('/') === -1) {
       ensureDir(path.join(installPath, pkgName))
     } else {
       const i = file.path.indexOf('/')
       const filePath = file.path.substring(i + 1, file.path.lastIndexOf('/') + 1)
       const checkDir = path.join(installPath, pkgName, filePath )
-      console.log(checkDir)
-      //console.log(checkDir+ '/' + file.content.name)
       ensureDir(checkDir, (err) => {
         if (err) { throw err }
         const f = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.length)
-        console.log(f)
-        console.log(path.join(checkDir, f))
         file.content.pipe(fs.createWriteStream(path.join(checkDir, f)))
       })
     }
@@ -234,6 +229,7 @@ module.exports = function install (self) {
                 getFiles(pkgHash, name).then(() => {
                   createDeps(linkHash).then(() => {
                     ipfsOff()
+                    return callback(null, true)
                   })
                 })
               })

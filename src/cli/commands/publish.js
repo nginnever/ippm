@@ -4,7 +4,7 @@ const Command = require('ronin').Command
 const utils = require('../utils')
 
 module.exports = Command.extend({
-  desc: 'install a package',
+  desc: 'publish a package',
 
   options: {
     repo: {
@@ -12,13 +12,12 @@ module.exports = Command.extend({
       type: 'string'
     }
   },
-
-  run: (repo, name) => {
+  run: (folder) => {
     utils.getIPPM((err, ippm) => {
       if (err) { throw err }
-      console.log('NAME: ' + name)
-      console.log('IPFS REPO PATH (option): ' + repo)
-      ippm.install(name, (err, res) => {
+      if (!folder) { folder = process.cwd()}
+      console.log('PUBLISHING: ' + folder)
+      ippm.publish(folder, (err, res) => {
         if (err) {
           throw err
         }
