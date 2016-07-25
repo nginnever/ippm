@@ -72,34 +72,23 @@ function getFiles (dephash, pkgName) {
 
 function fileHandler (result, pkgName) {
   return function onFile (file) {
-    console.log(file.path)
+    //console.log(file.path)
     if (file.path.lastIndexOf('/') === -1) {
       ensureDir(path.join(installPath, pkgName))
-    }
-    // Check to see if the result is in a directory
-/*    if (file.path.lastIndexOf('/') === -1) {
-      const dirPath = path.join(dir, file.path)
-      // Check to see if the result is a directory
-      if (file.dir === false) {
-        file.content.pipe(fs.createWriteStream(dirPath))
-      } else {
-        ensureDir(dirPath, (err) => {
-          if (err) {
-            throw err
-          }
-        })
-      }
     } else {
-      const filePath = file.path.substring(0, file.path.lastIndexOf('/') + 1)
-      const dirPath = path.join(dir, filePath)
-      ensureDir(dirPath, (err) => {
-        if (err) {
-          throw err
-        }
-
-        file.content.pipe(fs.createWriteStream(dirPath))
+      const i = file.path.indexOf('/')
+      const filePath = file.path.substring(i + 1, file.path.lastIndexOf('/') + 1)
+      const checkDir = path.join(installPath, pkgName, filePath )
+      console.log(checkDir)
+      //console.log(checkDir+ '/' + file.content.name)
+      ensureDir(checkDir, (err) => {
+        if (err) { throw err }
+        const f = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.length)
+        console.log(f)
+        console.log(path.join(checkDir, f))
+        file.content.pipe(fs.createWriteStream(path.join(checkDir, f)))
       })
-    }*/
+    }
   }
 }
 
@@ -174,7 +163,6 @@ function ipfsOn () {
 function ipfsOff () {
   ipfs.goOffline((err, res) => {
     if (err) { throw (err) }
-    //resolve()
   })
 }
 
@@ -191,6 +179,19 @@ function getLatestVersion (hash) {
       })
     })
   })
+}
+
+function web3On () {
+  if (typeof web3 !== 'undefined') {
+    web3 = new Web3(web3.currentProvider)
+  } else {
+    // set the provider you want from Web3.providers
+    // local server
+    // web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
+
+    // demo server
+    web3 = new Web3(new Web3.providers.HttpProvider('http://149.56.133.176:8545'))
+  }
 }
 
 module.exports = function install (self) {
@@ -211,21 +212,12 @@ module.exports = function install (self) {
         }
         // place logic here for ippm install <no arg>
         // this should look in package.json and begin
-        // installing dependencies
+        // installing dependencies, add this object to the index
         console.log(obj)
+        web3On()
       })
     } else {
-      if (typeof web3 !== 'undefined') {
-        web3 = new Web3(web3.currentProvider)
-      } else {
-        // set the provider you want from Web3.providers
-        // local server
-        // web3 = new Web3(new Web3.providers.HttpProvider("http://localhost:8545"))
-
-        // demo server
-        web3 = new Web3(new Web3.providers.HttpProvider('http://149.56.133.176:8545'))
-      }
-
+      web3On()
       searchReg(name).then((res) => {
         if (res[2] === '') {
           console.log('No package found')
