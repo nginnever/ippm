@@ -44,9 +44,9 @@ function writeDep (pkgName) {
     searchReg(pkgName).then((ihash) => {
       if (ihash[2] === '') {
         console.log('dependency not registered skipping: ' + pkgName)
-        return reject(new Error ('package not found in registry'))
+        return reject(new Error('package not found in registry'))
       }
-      getLatestVersion(ihash[2]+ihash[3]).then((dephash) => {
+      getLatestVersion(ihash[2] + ihash[3]).then((dephash) => {
         console.log('---')
         console.log('writing: ' + pkgName + ' - version: ' + index[pkgName])
         console.log('nodehash: ' + ihash[2] + ihash[3])
@@ -77,7 +77,7 @@ function fileHandler (result, pkgName) {
     } else {
       const i = file.path.indexOf('/')
       const filePath = file.path.substring(i + 1, file.path.lastIndexOf('/') + 1)
-      const checkDir = path.join(installPath, pkgName, filePath )
+      const checkDir = path.join(installPath, pkgName, filePath)
       ensureDir(checkDir, (err) => {
         if (err) { throw err }
         const f = file.path.substring(file.path.lastIndexOf('/') + 1, file.path.length)

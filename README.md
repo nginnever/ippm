@@ -2,20 +2,23 @@
 
 An NPM compatible distributed package manager tool for Javascript dependencies.
 
+*this will not be usable until I register all of the npm modules in ippm-registry and port registry-mirror into the app to backup the packages. This currently runs off of test packages*
+
 ## Table of Contents
 
-- [Motivations](#motivations)
+- [Background](#background)
 - [Install](#install)
 - [Commands](#commands)
   - [Init](#init)
   - [Install](#install)
   - [Publish](#publish)
   - [Version](#version)
+- [Web Interface](#web-interface) 
 - [Data Model](#data-model)
 - [Contribute](#contribute)
 - [License](#license)
 
-## Motivations
+## Background
 
 Package managers like [npm](https://www.npmjs.com/) are great tools for developers. ippm is an attempt to improve a system like npm with distribution of data, registry, and control. The need for such improvements is as follows: 
 
@@ -50,8 +53,6 @@ ippm private repositories can be created by encrypting the data before hashing w
 
 ```npm i ippm```
 
-ipfs hash: Qm...
-
 install ippm globaly to use ippm from any location or run from ```/src/cli/bin.js```
 
 ```npm i ippm -g```
@@ -61,10 +62,13 @@ TODO: Build symlink capability in ippm
 #### Install with IPFS
 
 Run a local go or js-ipfs node and cli
+
+TODO:
+
 ```
 ipfs get hash
 cd hash
-ippm install
+./install
 ```
 
 ## Commands
@@ -138,6 +142,22 @@ ippm version looks at the ethereum block chain to find the associated ipld hash 
 supplied package name. The latest version is then grabbed from the array of version history
 contained in the ipld object.
 ```
+
+<img src="http://i.imgur.com/rHfxGzf.png" align="middle"></img>
+
+<img src="http://i.imgur.com/FNitk2w.png" align="middle"></img>
+
+<img src="http://i.imgur.com/T5nRnmk.png" align="middle"></img>
+
+## Web Interface
+
+http://localhost:8080/ipfs/QmSGXf6KXUZFUspCArTnLeYWm8dRK8cYiahcD8rLcbeY6b
+
+There is a web application from ippm-registry to view and publish packages. This currently needs to have the correct ipld hash supplied to the web client.
+
+You can download the web client via the ipfs hash or go to the ippm-registry repo and build it from source.
+
+TODO: Make web client publishing/permissions/accounts easy to use.
 
 ## Data Model
 

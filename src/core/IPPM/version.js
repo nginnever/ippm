@@ -47,10 +47,10 @@ function web3On () {
     // demo server
     web3 = new Web3(new Web3.providers.HttpProvider('http://149.56.133.176:8545'))
   }
-    registryContract = web3.eth.contract(abi)
-    // const regInstance = registryContract.at('0xb5f546d5bc8ab6ce0a4091c8bf906800627912cd')
-    // server test net
-    regInstance = registryContract.at('0x7b7ac61b0c77fbde14b61eb31494abd05f4fd0ae')
+  registryContract = web3.eth.contract(abi)
+  // const regInstance = registryContract.at('0xb5f546d5bc8ab6ce0a4091c8bf906800627912cd')
+  // server test net
+  regInstance = registryContract.at('0x7b7ac61b0c77fbde14b61eb31494abd05f4fd0ae')
 }
 
 function ipfsOff () {
@@ -74,17 +74,16 @@ function getLatestVersion (hash) {
   })
 }
 
-
 module.exports = function version (self) {
   return (name, callback) => {
-  	web3On()
-  	searchReg(name).then((res) => {
-  		ipfsOn().then(() => {
-  			getLatestVersion(res[2] + res[3]).then((version) => {
-  				ipfsOff()
-  				callback(null, version)
-  			})
-  		})
-  	})
+    web3On()
+    searchReg(name).then((res) => {
+      ipfsOn().then(() => {
+        getLatestVersion(res[2] + res[3]).then((version) => {
+          ipfsOff()
+          callback(null, version)
+        })
+      })
+    })
   }
 }

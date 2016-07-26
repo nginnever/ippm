@@ -9,7 +9,7 @@ module.exports = Command.extend({
   run: (name) => {
     utils.getIPPM((err, ippm) => {
       if (err) { throw err }
-      if (!name) { throw new Error('must supply a package name')}
+      if (!name) { throw new Error('must supply a package name') }
       ippm.version(name, (err, res) => {
         if (err) {
           throw err

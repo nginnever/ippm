@@ -1,6 +1,5 @@
 'use strict'
 
-const isIPFS = require('is-ipfs')
 const Web3 = require('web3')
 const IPFS = require('ipfs')
 const path = require('path')
@@ -61,57 +60,56 @@ function web3On () {
     // demo server
     web3 = new Web3(new Web3.providers.HttpProvider('http://149.56.133.176:8545'))
   }
-    registryContract = web3.eth.contract(abi)
-    // const regInstance = registryContract.at('0xb5f546d5bc8ab6ce0a4091c8bf906800627912cd')
-    // server test net
-    regInstance = registryContract.at('0x7b7ac61b0c77fbde14b61eb31494abd05f4fd0ae')
+  registryContract = web3.eth.contract(abi)
+  // const regInstance = registryContract.at('0xb5f546d5bc8ab6ce0a4091c8bf906800627912cd')
+  // server test net
+  regInstance = registryContract.at('0x7b7ac61b0c77fbde14b61eb31494abd05f4fd0ae')
 }
 
 function packageFiles (pkgpath) {
   return new Promise((resolve, reject) => {
-  	rootDir = pkgpath.substring(pkgpath.lastIndexOf('/') + 1, path.length)
-  	const rootIndex = pkgpath.length
-  	const substr = 'node_modules'
-  	glob(path.join(pkgpath, '/**/*'), (err, res) => {
-  		if (err) { return reject(err) }
-  	  ipfs.files.createAddStream((err, i) => {
-  	  	if (err) { reject(err) }
-  	  	var filePair
-  	    i.on('data', (file) => {
-  	    	fileHashs[file.path] = bs58.encode(file.node.multihash()).toString()
-  	    	console.log('added', bs58.encode(file.node.multihash()).toString(), file.path)
-  	    })
-  	    i.once('end', () => {
-  	    	resolve()
-  	    })
-	  		async.eachLimit(res, 10, (element, callback) => {
-	  			if (element.indexOf(substr) > -1) {
-	  				callback()
-	  				return
-	  			}
-	  			if (fs.statSync(element).isDirectory()) {
-	  				callback()
-	  				return
-	  			}
-	  			i.write({
-	  				path: element.substring(element.indexOf(rootDir), element.length),
-	  				content: fs.createReadStream(element)
-	  			})
-	  			callback()
-	  		}, (err) => {
-	  			if (err) { reject(err) }
-	  			i.end()
-	  		})
-  	  })
-  	})
+    rootDir = pkgpath.substring(pkgpath.lastIndexOf('/') + 1, path.length)
+    const substr = 'node_modules'
+    glob(path.join(pkgpath, '/**/*'), (err, res) => {
+      if (err) { return reject(err) }
+      ipfs.files.createAddStream((err, i) => {
+        if (err) { reject(err) }
+        i.on('data', (file) => {
+          fileHashs[file.path] = bs58.encode(file.node.multihash()).toString()
+          console.log('added', bs58.encode(file.node.multihash()).toString(), file.path)
+        })
+        i.once('end', () => {
+          resolve()
+        })
+        async.eachLimit(res, 10, (element, callback) => {
+          if (element.indexOf(substr) > -1) {
+            callback()
+            return
+          }
+          if (fs.statSync(element).isDirectory()) {
+            callback()
+            return
+          }
+          i.write({
+            path: element.substring(element.indexOf(rootDir), element.length),
+            content: fs.createReadStream(element)
+          })
+          callback()
+        }, (err) => {
+          if (err) { reject(err) }
+          i.end()
+        })
+      })
+    })
   })
 }
 
 function publishHash (repoHash) {
-	return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     createIPLD(repoHash, pkgjson.name, pkgjson.version).then((ipldobj) => {
       console.log('IPLD object created')
       ipfs.files.createAddStream((err, i) => {
+        if (err) { reject(err) }
         i.on('data', (file) => {
           elementHash = bs58.encode(file.node.multihash()).toString()
           console.log('added', bs58.encode(file.node.multihash()).toString(), file.path)
@@ -121,13 +119,15 @@ function publishHash (repoHash) {
           const hash1 = elementHash.substring(0, 17)
           const hash2 = elementHash.substring(17, elementHash.length)
           if (!repoInit) {
-            regInstance.init(pkgjson.name, hash1, hash2, {from: '0xf8ffa4023fc58b0321e6619b07962a75115803c6', gas:150000}, (err, txhash) => {
+            regInstance.init(pkgjson.name, hash1, hash2, {from: '0xf8ffa4023fc58b0321e6619b07962a75115803c6', gas: 150000}, (err, txhash) => {
+              if (err) { reject(err) }
               resolve(txhash)
             })
           } else {
-            regInstance.publish(pkgjson.name, hash1, hash2, {from: '0xf8ffa4023fc58b0321e6619b07962a75115803c6', gas:150000}, (err, txhash) => {
+            regInstance.publish(pkgjson.name, hash1, hash2, {from: '0xf8ffa4023fc58b0321e6619b07962a75115803c6', gas: 150000}, (err, txhash) => {
+              if (err) { reject(err) }
               resolve(txhash)
-            })  
+            })
           }
         })
         const fpath = path.join(process.cwd(), 'tmp.json')
@@ -138,14 +138,11 @@ function publishHash (repoHash) {
         i.end()
       })
     })
-	})
+  })
 }
 
 function createIPLD (rHash, rName, rVersion) {
   return new Promise((resolve, reject) => {
-    console.log(rHash)
-    console.log(rVersion)
-    console.log(rName)
     searchReg(rName).then((res) => {
       // if this package is not already registered
       if (res[2] === '') {
@@ -153,8 +150,8 @@ function createIPLD (rHash, rName, rVersion) {
         ipld['name'] = rName
         ipld['versions'] = []
         ipld['versions'].push({
-          'version': '^' + rVersion,
-          'hash': rHash
+          version: '^' + rVersion,
+          hash: rHash
         })
         ipld['versions'][0]['hash'] = rHash
         resolve(ipld)
@@ -162,10 +159,9 @@ function createIPLD (rHash, rName, rVersion) {
       }
       repoInit = true
       getIPLD(res[2] + res[3]).then((obj) => {
-        const i = obj['versions'].length + 1
         obj['versions'].push({
-          'version': '^' + rVersion,
-          'hash': rHash
+          version: '^' + rVersion,
+          hash: rHash
         })
         resolve(obj)
       })
@@ -176,7 +172,6 @@ function createIPLD (rHash, rName, rVersion) {
 function getIPLD (hash) {
   return new Promise((resolve, reject) => {
     ipfs.files.get(hash, (err, res) => {
-
       if (err) { return reject(err) }
       res.on('data', (file) => {
         file.content.on('data', (buf) => {
@@ -200,16 +195,16 @@ module.exports = function publish (self) {
   return (pkgpath, callback) => {
     web3On()
     ipfsOn().then(() => {
-    	console.log('IPFS online')
-    	console.log(pkgpath)
-    	packageFiles(pkgpath).then(() => {
-    		console.log('finished adding files!!!')
-    		publishHash(fileHashs[rootDir]).then((r) => {
+      console.log('IPFS online')
+      console.log(pkgpath)
+      packageFiles(pkgpath).then(() => {
+        console.log('finished adding files!!!')
+        publishHash(fileHashs[rootDir]).then((r) => {
           console.log('Published transaction hash: ' + r)
-    			console.log('finished publishing package!!!')
-    			ipfsOff()
-    		})
-    	})
+          console.log('finished publishing package!!!')
+          ipfsOff()
+        })
+      })
     })
   }
 }
