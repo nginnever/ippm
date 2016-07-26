@@ -1,6 +1,5 @@
 'use strict'
 
-const test = require('./IPPM/test')
 const init = require('./IPPM/init')
 const install = require('./IPPM/install')
 const publish = require('./IPPM/publish')
@@ -13,7 +12,6 @@ function IPPM () {
     throw new Error('Must be instantiated with new')
   }
 
-  this.test = test(this)
   this.init = init(this)
   this.install = install(this)
   this.publish = publish(this)
