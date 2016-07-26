@@ -1,5 +1,5 @@
 {
-  "name": "interplanetary-package-manager",
+  "name": "ippm",
   "version": "0.0.1",
   "description": "a distributed npm",
   "main": "lib/core/index.js",
