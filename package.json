@@ -1,6 +1,6 @@
 {
-  "name": "ippm",
-  "version": "0.0.1",
+  "name": "interplanetary-package-manager",
+  "version": "0.0.2",
   "description": "a distributed npm",
   "main": "lib/core/index.js",
   "jsnext:main": "src/core/index.js",

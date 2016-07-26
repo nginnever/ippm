@@ -4,10 +4,11 @@
 
 An NPM compatible distributed package manager tool for Javascript dependencies.
 
-*this will not be usable until I register all of the npm modules in ippm-registry and port registry-mirror into the app to backup the packages. This currently runs off of test packages*
+WIP: *this is not production ready... see TODO for progress towards removing WIP tag*
 
 ## Table of Contents
 
+- [Motivation](#motivation)
 - [Background](#background)
 - [Install](#install)
 - [Commands](#commands)
@@ -18,35 +19,48 @@ An NPM compatible distributed package manager tool for Javascript dependencies.
 - [Web Interface](#web-interface) 
 - [Data Model](#data-model)
 - [Contribute](#contribute)
+- [TODO](#todo)
 - [License](#license)
 
-## Background
+## Motivation
 
 Package managers like [npm](https://www.npmjs.com/) are great tools for developers. ippm is an attempt to improve a system like npm with distribution of data, registry, and control. The need for such improvements is as follows: 
 
 #### Legal
 
-There has been a recent example case of one developer put under legal pressures to remove a dependecy thus inspiring him to remove another dependency of many popular javascript modules.  The removal of the package caused damage to many dependent systems which caused the central authority of npm to controversally reinstate the removed package without permission. With ippm upgrades to npm, the permission to packages in is the public key of the owner and not a large corporation.
+Left pad is an example case of one developer put under legal pressures to remove a package thus inspiring him to remove another dependency of many popular javascript modules.  The removal of the package caused damage to many dependent systems which caused the central authority of npm to controversially reinstate the removed package without permission. With ippm upgrades to npm, the permission to packages is attached to the private key of the owner and not a large corporation.
 
 [more information](http://www.theregister.co.uk/2016/03/23/npm_left_pad_chaos/)
 
 #### Data Availability
 
-ippm packages are distributed with [IPFS](https://ipfs.io) rather than stored in a data center. Currently ippm uses a set of servers with @daviddias [npm-registry mirror](https://github.com/diasdavid/npm-on-ipfs) to help seed the packages until a more robust system of distributed payment (filecoin) is implemented.
+Rather than stored in a data center, ippm hopes to achieve data redundancy with p2p protocols. This raises questions about how to incentivise nodes to seed packages that filecoin hopes to answer.
 
 #### Distributed Registry
 
-ippm uses the ethereum blockchain to maintain that permissions over packages are distributed. ippm uses the [ippm-registry](https://github.com/nginnever/ippm-registry) to accomplish this
+The modules are stored in IPFS and retrievable by their hash stored in a distributed blockchain, the hash can then be cryptographically tied to an identity. You automatically get signed and verified software packages as a default behavior.
 
 #### Costs
 
-```Free as in freedom, there are still going to be financial costs needed to run this. Currently there is a miner fee for publishing packages, public or private cost the same. There is also a need to support the nodes hosting your files on ipfs. The metrics for that have not been worked out yet.```
+```Free as in freedom, there are still going to be financial costs to running this. Currently there is a miner fee for publishing packages, public or private cost the same. There is also a need to support the nodes seeding packages on ipfs. The metrics for that have not been worked out yet.```
 
-ippm private repositories can be created by encrypting the data before hashing with ipfs. In the future an ecryption option will be provided in a private repository function. This feature is free for individual and production use cases. 
+ippm private repositories can be created by encrypting the data before hashing with ipfs. In the future an encryption option will be provided in a private repository function. This feature is free for individual and production use cases. 
+
+## Background
+
+#### IPFS
+
+ippm packages are distributed with [IPFS](https://ipfs.io) which content addresses files via a DHT. More information on the libp2p network stack and IPFS content addressing can be found [here](https://github.com/ipfs/specs). Currently ippm uses a set of servers with @diasdavid [npm-registry mirror](https://github.com/diasdavid/npm-on-ipfs) to help seed the packages until a more robust system of distributed payment (filecoin) is implemented.
+
+This is built with js-ipfs and no prior installation will be required to have a node boot up and access the network. Optionally I would like to build a switch to run js-ipfs-api to a local go-ipfs node.
+
+#### Ethereum
+
+[Ethereum](www.ethereum.org) (ETH) is the blockchain chosen for ippm. This maintains that permissions over packages are distributed as well as act as a pointer to published packages. ippm uses the [ippm-registry](https://github.com/nginnever/ippm-registry) to accomplish this.
 
 ## Install
 
-#### Requirments
+#### Requirements
 
 - node js
 - npm (but not for long)
@@ -55,21 +69,17 @@ ippm private repositories can be created by encrypting the data before hashing w
 
 ```npm i interplanetary-package-manager```
 
-install ippm globaly to use ippm from any location or run from ```/src/cli/bin.js```
+install ippm globally to use ippm from any location or run from ```/src/cli/bin.js```
 
 ```npm i interplanetary-package-manager  -g```
-
-TODO: Build symlink capability in ippm
 
 #### Install with IPFS
 
 Run a local go or js-ipfs node and cli
 
-TODO:
-
 ```
-ipfs get hash
-cd hash
+ipfs get <distribution hash>
+cd <distribution hash>
 ./install
 ```
 
@@ -124,7 +134,7 @@ ARGUMENTS:
 
 DESCRIPTION
 
-ippm publish looks in the current directory (optionally provide a different directort)
+ippm publish looks in the current directory (optionally provide a different directory)
 for a package.json file. It will hash the directory and publish the version number
 with the hash and package name in the smart contract registry
 ```
@@ -155,11 +165,9 @@ contained in the ipld object.
 
 http://localhost:8080/ipfs/QmSGXf6KXUZFUspCArTnLeYWm8dRK8cYiahcD8rLcbeY6b
 
-There is a web application from ippm-registry to view and publish packages. This currently needs to have the correct ipld hash supplied to the web client.
+There is a web application to interface with the ippm-registry where you can search, view and publish packages. This currently needs to have the correct json model as detailed below multihashed and supplied to the web client while publishing. More information can be found in [ippm-registry](https://github.com/nginnever/ippm-registry)
 
 You can download the web client via the ipfs hash or go to the ippm-registry repo and build it from source.
-
-TODO: Make web client publishing/permissions/accounts easy to use.
 
 ## Data Model
 
@@ -180,6 +188,21 @@ Example: ipfs-unixfs-engine module
   ]
 }
 ```
+
+## Contribute
+
+Feel free to drop by #ipfs and ping me (voxelot) in irc or file an issue here.
+
+## TODO
+
+- [ ] register all of the npm modules in ippm-registry
+- [ ] port registry-mirror repo format into the app
+- [ ] publish the registry to the main ethereum chain
+- [ ] Write js-ipfs-api switch for go-ipfs support
+- [ ] Build binaries and install scripts for distribution
+- [ ] add all of the nice npm symlink things
+- [ ] Make web client publishing/permissions/accounts easy to use
+- [ ] js-ipfs to handle both merkledag protobufs and ipld cbor objects
 
 ## License
 
