@@ -53,11 +53,11 @@ ippm private repositories can be created by encrypting the data before hashing w
 
 #### Install via npm
 
-```npm i ippm```
+```npm i interplanetary-package-manager```
 
 install ippm globaly to use ippm from any location or run from ```/src/cli/bin.js```
 
-```npm i ippm -g```
+```npm i interplanetary-package-manager  -g```
 
 TODO: Build symlink capability in ippm
 
