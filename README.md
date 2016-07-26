@@ -1,3 +1,5 @@
+<img src="http://i.imgur.com/wrAZS2m.png"></img>
+
 # Interplanetary Package Manager
 
 An NPM compatible distributed package manager tool for Javascript dependencies.
