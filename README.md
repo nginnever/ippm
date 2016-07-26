@@ -43,8 +43,9 @@ ippm private repositories can be created by encrypting the data before hashing w
 #### Requirments
 
 - node js
+- npm (but not for long)
 
-#### Downloaded via npm or ipfs
+#### Install via npm
 
 ```npm i ippm```
 
@@ -54,6 +55,16 @@ install ippm globaly to use ippm from any location or run from ```/src/cli/bin.j
 
 ```npm i ippm -g```
 
+TODO: Build symlink capability in ippm
+
+#### Install with IPFS
+
+Run a local go or js-ipfs node and cli
+```
+ipfs get hash
+cd hash
+ippm install
+```
 
 ## Commands
 
