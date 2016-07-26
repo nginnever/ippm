@@ -1,4 +1,4 @@
-<img src="http://i.imgur.com/wrAZS2m.png"></img>
+<img src="http://i.imgur.com/65GfDmT.png"></img>
 
 # Interplanetary Package Manager
 
