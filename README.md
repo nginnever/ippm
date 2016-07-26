@@ -10,6 +10,7 @@ An NPM compatible distributed package manager tool for Javascript dependencies.
   - [Init](#init)
   - [Install](#install)
   - [Publish](#publish)
+  - [Version](#version)
 - [Data Model](#data-model)
 - [Contribute](#contribute)
 - [License](#license)
@@ -120,6 +121,22 @@ DESCRIPTION
 ippm publish looks in the current directory (optionally provide a different directort)
 for a package.json file. It will hash the directory and publish the version number
 with the hash and package name in the smart contract registry
+```
+
+#### Version
+
+```
+ippm version <name>
+
+ARGUMENTS:
+
+ -name <string> 'name of the package version you are checking'
+
+DESCRIPTION
+
+ippm version looks at the ethereum block chain to find the associated ipld hash for the 
+supplied package name. The latest version is then grabbed from the array of version history
+contained in the ipld object.
 ```
 
 ## Data Model
