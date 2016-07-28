@@ -10,15 +10,13 @@ const bs58 = require('bs58')
 const abi = require('../utils').abi
 const jsonfile = require('jsonfile')
 
-const p = path.join(process.cwd(), 'package.json')
-const pkgjson = require(p)
-
 let web3
 let ipfs
 let rs
 let elementHash
 let registryContract
 let regInstance
+let pkgjson
 var repoInit
 var fileHashs = {}
 var ipld = {}
@@ -193,6 +191,12 @@ function searchReg (name) {
 
 module.exports = function publish (self) {
   return (pkgpath, callback) => {
+    try {
+      const p = path.join(process.cwd(), 'package.json')
+      pkgjson = require(p)
+    } catch(err) {
+      throw new Error('no package.json file found in this directory')
+    }
     web3On()
     ipfsOn().then(() => {
       console.log('IPFS online')
