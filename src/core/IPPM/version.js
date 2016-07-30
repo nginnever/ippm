@@ -33,7 +33,8 @@ function ipfsOn () {
   })
     .then(() => new Promise((resolve, reject) => {
       ipfs.goOnline(() => {
-      	ipfs.libp2p.swarm.connect('/ip4/192.168.0.28/tcp/4001/ipfs/QmUbyodwDS2gbpjGnsqF1e92g3LBHtHjP1ucv8SM1hs2MS', (err, res) => {
+      	ipfs.libp2p.swarm.connect('/ip4/149.56.133.176/tcp/4001/ipfs/QmSthn575jkPEt8nE6Wm9qLN4J4k6CpPpH7qK6buSmQFjh', (err, res) => {
+      		console.log(err)
       		console.log(res)
       		ipfs.libp2p.swarm.peers((err, res) => {
       			console.log(res)
