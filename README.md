@@ -195,6 +195,8 @@ Feel free to drop by #ipfs and ping me (voxelot) in irc or file an issue here.
 
 ## TODO
 
+- [ ] update install algorithm
+- [ ] document install algorithm
 - [ ] register all of the npm modules in ippm-registry
 - [ ] port registry-mirror repo format into the app
 - [ ] publish the registry to the main ethereum chain
