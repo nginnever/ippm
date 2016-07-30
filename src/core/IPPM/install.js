@@ -3,11 +3,12 @@
 const jsonfile = require('jsonfile')
 const path = require('path')
 const Web3 = require('web3')
-const IPFS = require('ipfs')
+const IPFS = require('ipfs-api')
 const abi = require('../utils').abi
 const bs58 = require('bs58')
 const pathExists = require('path-exists')
 const fs = require('fs')
+const bl = require('bl')
 
 let web3
 let ipfs
@@ -62,10 +63,14 @@ function writeDep (pkgName) {
 
 function getFiles (dephash, pkgName) {
   return new Promise((resolve, reject) => {
-    ipfs.files.get(dephash, (err, res) => {
+    const mh = new Buffer(bs58.decode(dephash))
+    ipfs.object.get(mh, (err, res) => {
       if (err) { return reject(err) }
-      res.on('data', fileHandler(res, pkgName))
-      res.on('end', resolve())
+      res.links.forEach((link) => {
+        console.log(link.name)
+      })
+      //res.on('data', fileHandler(res, pkgName))
+      //res.on('end', resolve())
     })
   })
 }
@@ -116,6 +121,7 @@ function createDeps (linkHash) {
 function readPkgFile (pkgHash) {
   return new Promise((resolve, reject) => {
     var f = false
+    console.log(pkgHash)
     const mh = new Buffer(bs58.decode(pkgHash))
     ipfs.object.get(mh, (err, res) => {
       if (err) { reject(err) }
@@ -138,40 +144,28 @@ function readPkgFile (pkgHash) {
 
 function ipfsOn () {
   return new Promise((resolve, reject) => {
-    ipfs = new IPFS()
-    ipfs.init({}, (err) => {
-      if (err) {
-        if (err.message === 'repo already exists') {
-          return resolve()
-        }
-        return reject(err)
-      }
-      resolve()
+    ipfs = IPFS('/ip4/127.0.0.1/tcp/5001')
+    ipfs.id()
+    .then(function (id) {
+      resolve(ipfs)
     })
-  })
-    .then(() => new Promise((resolve, reject) => {
-      console.log('repo ready!')
-      ipfs.goOnline(() => resolve(ipfs))
-    }))
-}
-
-function ipfsOff () {
-  ipfs.goOffline((err, res) => {
-    if (err) { throw (err) }
+    .catch(function(err) {
+      reject(err)
+    })
   })
 }
 
 function getLatestVersion (hash) {
   return new Promise((resolve, reject) => {
-    ipfs.files.get(hash, (err, res) => {
-      if (err) { return reject(err) }
-      res.on('data', (file) => {
-        file.content.on('data', (buf) => {
-          // always grab the latest registered version
-          const size = JSON.parse(buf.toString()).versions.length
-          resolve(JSON.parse(buf.toString()).versions[size - 1].hash)
-        })
-      })
+    ipfs.cat(hash)
+    .then((stream) => {
+      stream.pipe(bl((err, data) => {
+        const size = JSON.parse(data.toString()).versions.length
+        resolve(JSON.parse(data.toString()).versions[size - 1].hash)
+      }))
+    })
+    .catch((err) => {
+      reject(err)
     })
   })
 }
@@ -215,13 +209,14 @@ module.exports = function install (self) {
       web3On()
       searchReg(name).then((res) => {
         if (res[2] === '') {
-          console.log('No package found')
-          return
+          return callback (new Error('No package found'), null)
         }
+        console.log('Installing: ' + name)
         console.log('element: ' + res[2] + res[3])
         ipfsOn().then(() => {
           console.log('ipfs online')
           getLatestVersion(res[2] + res[3]).then((pkgHash) => {
+            console.log(pkgHash)
             readPkgFile(pkgHash).then((linkHash) => {
               console.log('writing package: ')
               ensureDir(installPath, () => {
@@ -235,9 +230,10 @@ module.exports = function install (self) {
               })
             })
           })
+        }).catch((err) => {
+          return callback(err, null)
         })
       })
-      console.log('Installing: ' + name)
     }
   }
 }

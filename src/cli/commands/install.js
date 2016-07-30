@@ -20,7 +20,7 @@ module.exports = Command.extend({
       console.log('IPFS REPO PATH (option): ' + repo)
       ippm.install(name, (err, res) => {
         if (err) {
-          throw err
+          console.log(err)
         }
       })
     })

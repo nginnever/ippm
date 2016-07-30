@@ -2,7 +2,8 @@
 
 const Web3 = require('web3')
 const abi = require('../utils').abi
-const IPFS = require('ipfs')
+const IPFS = require('ipfs-api')
+const bl = require('bl')
 
 let web3
 let ipfs
@@ -20,20 +21,15 @@ function searchReg (name) {
 
 function ipfsOn () {
   return new Promise((resolve, reject) => {
-    ipfs = new IPFS()
-    ipfs.init({}, (err) => {
-      if (err) {
-        if (err.message === 'repo already exists') {
-          return resolve()
-        }
-        return reject(err)
-      }
-      resolve()
-    })
+    ipfs = IPFS('/ip4/127.0.0.1/tcp/5001')
+	  ipfs.id()
+	  .then(function (id) {
+	    resolve(ipfs)
+	  })
+	  .catch(function(err) {
+	    reject(err)
+	  })
   })
-    .then(() => new Promise((resolve, reject) => {
-      ipfs.goOnline(() => resolve(ipfs))
-    }))
 }
 
 function web3On () {
@@ -53,23 +49,18 @@ function web3On () {
   regInstance = registryContract.at('0x7b7ac61b0c77fbde14b61eb31494abd05f4fd0ae')
 }
 
-function ipfsOff () {
-  ipfs.goOffline((err, res) => {
-    if (err) { throw (err) }
-  })
-}
 
 function getLatestVersion (hash) {
   return new Promise((resolve, reject) => {
-    ipfs.files.get(hash, (err, res) => {
-      if (err) { return reject(err) }
-      res.on('data', (file) => {
-        file.content.on('data', (buf) => {
-          // always grab the latest registered version
-          const size = JSON.parse(buf.toString()).versions.length
-          resolve(JSON.parse(buf.toString()).versions[size - 1].version)
-        })
-      })
+    ipfs.cat(hash)
+    .then((stream) => {
+      stream.pipe(bl((err, data) => {
+      	const size = JSON.parse(data.toString()).versions.length
+        resolve(JSON.parse(data.toString()).versions[size - 1].version)
+      }))
+    })
+    .catch((err) => {
+      reject(err)
     })
   })
 }
@@ -80,9 +71,10 @@ module.exports = function version (self) {
     searchReg(name).then((res) => {
       ipfsOn().then(() => {
         getLatestVersion(res[2] + res[3]).then((version) => {
-          ipfsOff()
           callback(null, version)
         })
+      }).catch((err) => {
+      	callback(err, null)
       })
     })
   }

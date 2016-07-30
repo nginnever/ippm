@@ -12,7 +12,7 @@ module.exports = Command.extend({
       if (!name) { throw new Error('must supply a package name') }
       ippm.version(name, (err, res) => {
         if (err) {
-          throw err
+          console.log(err)
         }
         console.log(name + ' version: ' + res)
       })
