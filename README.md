@@ -11,6 +11,7 @@ WIP: *this is not production ready... see TODO for progress towards removing WIP
 - [Motivation](#motivation)
 - [Background](#background)
 - [Install](#install)
+  - [Usage](#usage)
 - [Commands](#commands)
   - [Init](#init)
   - [Install](#install)
@@ -67,13 +68,15 @@ This is built with js-ipfs and no prior installation will be required to have a 
 
 #### Install via npm
 
+*NPM published version of ippm requires a running go-ipfs daemon to work atm, see [usage](#usage) for more info.*
+
 ```npm i interplanetary-package-manager```
 
 install ippm globally to use ippm from any location or run from ```/src/cli/bin.js```
 
 ```npm i interplanetary-package-manager  -g```
 
-#### Install with IPFS
+#### Install with IPFS (coming soon!)
 
 Run a local go or js-ipfs node and cli
 
@@ -82,6 +85,25 @@ ipfs get <distribution hash>
 cd <distribution hash>
 ./install
 ```
+
+## Usage
+
+#### Master Branch
+
+The master branch currently requires that you run a local go-ipfs daemon in order to download packages from peers. See js-ipfs branch for the full javascript implementation.
+
+1) Install go-ipfs - See [ipfs install](https://ipfs.io/docs/install/)
+
+2) Init a repository  ```ipfs init```
+
+3) Start ipfs daemon ```ipfs daemon``` (may need cors origin)
+
+4) Use ippm commands
+
+
+#### js-ipfs Branch
+
+The libp2p and js-ipfs branchs are a complete js implementation that are close to being ready. See TODO for more information. 
 
 ## Commands
 
