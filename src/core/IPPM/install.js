@@ -13,7 +13,8 @@ const async = require('async')
 
 let web3
 let ipfs
-let pathname
+var pathname = ''
+var oldpath = ''
 var index = {}
 const installPath = process.cwd() + '/node_modules'
 
@@ -64,27 +65,33 @@ function writeDep (pkgName) {
 }
 
 function recurse (newpath, node, cb) {
-  if (newpath) { 
-    pathname = pathname.concat(newpath)
+  if (newpath != oldpath) { 
+    pathname = path.join(pathname, newpath)
+    oldpath = newpath
   }
 
-  if (node.name.includes('.')) {
-    console.log(pathname)
-    cb()
-  } else {
-    console.log(pathname)
-    ipfs.object.get(node.hash, (err, res) => {
-      async.eachLimit(res.links, 10, (element, callback) => {
-        pathname = ''
-        recurse(element.name, element, () => {
+  ipfs.object.get(node.hash, (err, res) => {
+    if (res.data.toString() === '\b\u0001') {
+      // TODO handle empty dirs
+      //if (res.links === []) { return }
+      async.eachSeries(res.links, (element, callback) => {
+        recurse(node.name, element, (err, res) => {
+          console.log(res)
           callback()
         })
       }, (err) => {
-        console.log('finished')
-        cb()
+        if (err) { cb(err, null) }
+        console.log(pathname)
+        pathname = pathname.substring(0, pathname.lastIndexOf('/'))
+        console.log(pathname)
+        oldpath = newpath
+        cb(null, 'finished walking folder ' + node.name)
+        return
       })
-    })
-  }
+    } else {
+      cb(null, 'this link was a file ' + path.join(pathname, node.name))
+    }
+  })
 }
 
 function getFiles (dephash, pkgName) {
@@ -92,9 +99,9 @@ function getFiles (dephash, pkgName) {
     const mh = new Buffer(bs58.decode(dephash))
     ipfs.object.get(mh, (err, res) => {
       if (err) { return reject(err) }
-      async.eachLimit(res.links, 10, (element, callback) => {
-        pathname = ''
-        recurse(null, element, () => {
+      async.eachSeries(res.links, (element, callback) => {
+        recurse('/', element, (err, res) => {
+          console.log(res)
           callback()
         })
       }, (err) => {
