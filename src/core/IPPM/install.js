@@ -69,27 +69,35 @@ function recurse (newpath, node, cb) {
     pathname = path.join(pathname, newpath)
     oldpath = newpath
   }
-
+  ensureDir(path.join(installPath, pathname))
   ipfs.object.get(node.hash, (err, res) => {
     if (res.data.toString() === '\b\u0001') {
       // TODO handle empty dirs
       //if (res.links === []) { return }
       async.eachSeries(res.links, (element, callback) => {
         recurse(node.name, element, (err, res) => {
-          console.log(res)
+          //console.log(res)
           callback()
         })
       }, (err) => {
         if (err) { cb(err, null) }
-        console.log(pathname)
         pathname = pathname.substring(0, pathname.lastIndexOf('/'))
-        console.log(pathname)
         oldpath = newpath
         cb(null, 'finished walking folder ' + node.name)
         return
       })
     } else {
-      cb(null, 'this link was a file ' + path.join(pathname, node.name))
+      console.log(node.hash)
+      ipfs.block.get(bs58.encode(node.hash).toString(), (err, res) => {
+        console.log(path.join(installPath, pathname, node.name))
+        const o = path.join(installPath, pathname, node.name)
+        res.pipe(fs.createWriteStream(o))
+
+        res.on('end', () => {
+          console.log('done streaming file')
+          cb(null, 'this link was a file ' + path.join(pathname, node.name))
+        })
+      })
     }
   })
 }
@@ -101,7 +109,7 @@ function getFiles (dephash, pkgName) {
       if (err) { return reject(err) }
       async.eachSeries(res.links, (element, callback) => {
         recurse('/', element, (err, res) => {
-          console.log(res)
+          //console.log(res)
           callback()
         })
       }, (err) => {
