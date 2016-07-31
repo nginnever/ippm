@@ -9,9 +9,11 @@ const bs58 = require('bs58')
 const pathExists = require('path-exists')
 const fs = require('fs')
 const bl = require('bl')
+const async = require('async')
 
 let web3
 let ipfs
+let pathname
 var index = {}
 const installPath = process.cwd() + '/node_modules'
 
@@ -61,13 +63,42 @@ function writeDep (pkgName) {
   })
 }
 
+function recurse (newpath, node, cb) {
+  if (newpath) { 
+    pathname = pathname.concat(newpath)
+  }
+
+  if (node.name.includes('.')) {
+    console.log(pathname)
+    cb()
+  } else {
+    console.log(pathname)
+    ipfs.object.get(node.hash, (err, res) => {
+      async.eachLimit(res.links, 10, (element, callback) => {
+        pathname = ''
+        recurse(element.name, element, () => {
+          callback()
+        })
+      }, (err) => {
+        console.log('finished')
+        cb()
+      })
+    })
+  }
+}
+
 function getFiles (dephash, pkgName) {
   return new Promise((resolve, reject) => {
     const mh = new Buffer(bs58.decode(dephash))
     ipfs.object.get(mh, (err, res) => {
       if (err) { return reject(err) }
-      res.links.forEach((link) => {
-        console.log(link.name)
+      async.eachLimit(res.links, 10, (element, callback) => {
+        pathname = ''
+        recurse(null, element, () => {
+          callback()
+        })
+      }, (err) => {
+        console.log('finished')
       })
       //res.on('data', fileHandler(res, pkgName))
       //res.on('end', resolve())
