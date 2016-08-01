@@ -56,6 +56,7 @@ function writeDep (pkgName) {
         console.log('nodehash: ' + ihash[2] + ihash[3])
         console.log('dephash: ' + dephash)
         console.log('---')
+        //resolve()
         getFiles(dephash, pkgName).then(() => {
           resolve(pkgName)
         })
@@ -64,19 +65,18 @@ function writeDep (pkgName) {
   })
 }
 
-function recurse (newpath, node, cb) {
+function recurse (newpath, node, pkg, cb) {
   if (newpath != oldpath) { 
     pathname = path.join(pathname, newpath)
     oldpath = newpath
   }
-  ensureDir(path.join(installPath, pathname))
+  ensureDir(path.join(installPath, pkg, pathname))
   ipfs.object.get(node.hash, (err, res) => {
     if (res.data.toString() === '\b\u0001') {
       // TODO handle empty dirs
       //if (res.links === []) { return }
       async.eachSeries(res.links, (element, callback) => {
-        recurse(node.name, element, (err, res) => {
-          //console.log(res)
+        recurse(node.name, element, pkg, (err, res) => {
           callback()
         })
       }, (err) => {
@@ -87,14 +87,11 @@ function recurse (newpath, node, cb) {
         return
       })
     } else {
-      console.log(node.hash)
       ipfs.block.get(bs58.encode(node.hash).toString(), (err, res) => {
-        console.log(path.join(installPath, pathname, node.name))
-        const o = path.join(installPath, pathname, node.name)
+        const o = path.join(installPath, pkg, pathname, node.name)
         res.pipe(fs.createWriteStream(o))
 
         res.on('end', () => {
-          console.log('done streaming file')
           cb(null, 'this link was a file ' + path.join(pathname, node.name))
         })
       })
@@ -108,12 +105,11 @@ function getFiles (dephash, pkgName) {
     ipfs.object.get(mh, (err, res) => {
       if (err) { return reject(err) }
       async.eachSeries(res.links, (element, callback) => {
-        recurse('/', element, (err, res) => {
-          //console.log(res)
+        recurse('/', element, pkgName, (err, res) => {
           callback()
         })
       }, (err) => {
-        console.log('finished')
+        resolve()
       })
       //res.on('data', fileHandler(res, pkgName))
       //res.on('end', resolve())
@@ -140,34 +136,40 @@ function fileHandler (result, pkgName) {
 
 function createDeps (linkHash) {
   return new Promise((resolve, reject) => {
-    ipfs.files.get(linkHash, (err, res) => {
-      if (err) { return reject(err) }
-      res.on('data', (file) => {
-        file.content.on('data', (buf) => {
-          const deps = JSON.parse(buf.toString()).dependencies
-          const devDeps = JSON.parse(buf.toString()).devDependencies
-          var combine = {}
-          for (var key0 in deps) combine[key0] = deps[key0]
-          for (var key1 in devDeps) combine[key1] = devDeps[key1]
-          index = combine
-          for (var key2 in combine) {
-            // version
-            // console.log(deps[key])
-            writeDep(key2).then((k) => {
-              console.log('wrote: ' + k)
-            })
-          }
-        })
+    let jso = {}
+    ipfs.block.get(bs58.encode(linkHash).toString(), (err, res) => {
+      res.on('data', (buf) => {
+        // really bad hack for extra bytes added to data
+        var j = buf.toString()
+        j.trim()
+        var t = j.substring(9, j.length - 3)
+        t = '{' + t
+        t.trim()
+        const deps = JSON.parse(t).dependencies
+        const devDeps = JSON.parse(t).devDependencies
+        var combine = {}
+        for (var key0 in deps) combine[key0] = deps[key0]
+        for (var key1 in devDeps) combine[key1] = devDeps[key1]
+        index = combine
+        for (var key2 in combine) {
+          // version
+          // console.log(deps[key])
+          writeDep(key2).then((k) => {
+            console.log('wrote: ' + k)
+          })
+        }
+      })
+
+      res.on('end', () => {
+        resolve()
       })
     })
-    resolve()
   })
 }
 
 function readPkgFile (pkgHash) {
   return new Promise((resolve, reject) => {
     var f = false
-    console.log(pkgHash)
     const mh = new Buffer(bs58.decode(pkgHash))
     ipfs.object.get(mh, (err, res) => {
       if (err) { reject(err) }
@@ -262,14 +264,13 @@ module.exports = function install (self) {
         ipfsOn().then(() => {
           console.log('ipfs online')
           getLatestVersion(res[2] + res[3]).then((pkgHash) => {
-            console.log(pkgHash)
             readPkgFile(pkgHash).then((linkHash) => {
               console.log('writing package: ')
               ensureDir(installPath, () => {
                 console.log('wrote node_modules folder: ')
                 getFiles(pkgHash, name).then(() => {
                   createDeps(linkHash).then(() => {
-                    ipfsOff()
+                    //ipfsOff()
                     return callback(null, true)
                   })
                 })
