@@ -70,13 +70,23 @@ ippm private repositories can be created by encrypting the data before hashing w
 
 *NPM published version of ippm requires a running go-ipfs daemon to work atm, see [usage](#usage) for more info.*
 
+Option 1: Git clone
+
+```
+git clone https://github.com/nginnever/ippm.git
+cd ippm
+sudo npm i -g
+```
+
+Option 2: npm
+
 ```npm i interplanetary-package-manager```
 
 install ippm globally to use ippm from any location or run from ```/src/cli/bin.js```
 
 ```npm i interplanetary-package-manager  -g```
 
-#### Install with IPFS (coming soon!)
+Option 3: IPFS (coming soon!)
 
 Run a local go or js-ipfs node and cli
 
