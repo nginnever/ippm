@@ -67,7 +67,7 @@ ippm private repositories can be created by encrypting the data before hashing w
 
 #### Requirements
 
-- node js
+- Node v4.x (LTS) or higher
 - npm (but not for long)
 - go-ipfs daemon (but not for long)
 
