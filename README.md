@@ -115,6 +115,13 @@ The master branch currently requires that you run a local go-ipfs daemon in orde
 
 4) Use ippm commands
 
+*example*
+
+```
+cd YourNewPackage
+ippm init
+ippm install acorn-test
+```
 
 #### js-ipfs Branch
 
