@@ -29,7 +29,11 @@ WIP: *this is not production ready... see TODO for progress towards removing WIP
 
 ippm packages are distributed with [IPFS](https://ipfs.io) which content addresses files via a DHT. More information on the libp2p network stack and IPFS content addressing can be found [here](https://github.com/ipfs/specs). Currently ippm uses a set of servers with @diasdavid [npm-registry mirror](https://github.com/diasdavid/npm-on-ipfs) to help seed the packages until a more robust system of distributed payment (filecoin) is implemented.
 
-This is built with js-ipfs and no prior installation will be required to have a node boot up and access the network. Optionally I would like to build a switch to run js-ipfs-api to a local go-ipfs node.
+For now this will require a running go-ipfs daemon to download packages. See the js-ipfs branch for full js implementation.
+
+*TODO: Work on routing blocks in js-ipfs*
+
+//This is built with js-ipfs and no prior installation will be required to have a node boot up and access the network. //Optionally I would like to build a switch to run js-ipfs-api to a local go-ipfs node.
 
 #### Ethereum
 
@@ -65,6 +69,7 @@ ippm private repositories can be created by encrypting the data before hashing w
 
 - node js
 - npm (but not for long)
+- go-ipfs daemon (but not for long)
 
 #### Install via npm
 
