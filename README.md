@@ -87,9 +87,16 @@ Option 2: npm
 
 ```npm i interplanetary-package-manager```
 
-install ippm globally to use ippm from any location or run from ```/src/cli/bin.js```
+install ippm globally to use ippm from any location
 
 ```npm i interplanetary-package-manager  -g```
+
+or run from the project bin
+
+```
+cd /src/cli/bin.js
+node bin.js <command>
+```
 
 Option 3: IPFS (coming soon!)
 
